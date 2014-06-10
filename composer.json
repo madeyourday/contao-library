@@ -1,0 +1,12 @@
+{
+	"name": "contao/contao-library",
+	"type": "library",
+	"description": "Contao 4 library",
+	"license": "LGPL-3.0+",
+	"authors": [
+		{
+			"name": "Leo Feyer",
+			"homepage": "https://github.com/leofeyer"
+		}
+	]
+}
