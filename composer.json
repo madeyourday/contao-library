@@ -8,5 +8,10 @@
 			"name": "Leo Feyer",
 			"homepage": "https://github.com/leofeyer"
 		}
-	]
+	],
+	"autoload": {
+		"psr-4": {
+			"Contao\\": "src/Contao/"
+		}
+	}
 }
