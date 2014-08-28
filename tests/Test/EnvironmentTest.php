@@ -27,7 +27,7 @@ class EnvironmentTest extends \PHPUnit_Framework_TestCase
         $GLOBALS['TL_CONFIG']['proxyServerIps'] = '';
 
         // User agents
-        include __DIR__ . '/../Fixtures/agents.php';
+        include __DIR__ . '/../Resources/config/agents.php';
 
         // Default environment
         $_SERVER = array(
