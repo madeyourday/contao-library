@@ -10,6 +10,7 @@
 		}
 	],
     "require": {
+		"php": ">=5.4.0",
         "leafo/lessphp": "~0.4",
         "leafo/scssphp": "dev-master",
         "leafo/scssphp-compass": "dev-master",
