@@ -9,6 +9,14 @@
 			"homepage": "https://github.com/leofeyer"
 		}
 	],
+    "require": {
+		"php": ">=5.4.0",
+        "leafo/lessphp": "~0.4",
+        "leafo/scssphp": "dev-master",
+        "leafo/scssphp-compass": "dev-master",
+        "mabrahamde/idna-converter": "dev-master",
+        "swiftmailer/swiftmailer": "~5.2"
+    },
     "require-dev": {
         "phpunit/phpunit": "~3.7"
     },

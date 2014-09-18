@@ -74,6 +74,12 @@ abstract class Widget extends View
 	protected $strClass;
 
 	/**
+	 * CSS class prefix
+	 * @var string
+	 */
+	protected $strPrefix;
+
+	/**
 	 * Wizard
 	 * @var string
 	 */
@@ -156,6 +162,7 @@ abstract class Widget extends View
 	 * * label:             the field label
 	 * * value:             the field value
 	 * * class:             one or more CSS classes
+	 * * prefix:            the CSS class prefix
 	 * * template:          the template name
 	 * * wizard:            the field wizard markup
 	 * * alt:               an alternative text
@@ -194,6 +201,7 @@ abstract class Widget extends View
 	 * * useHomeDir:        store uploaded files in the user's home directory
 	 * * trailingSlash:     add or remove a trailing slash
 	 * * spaceToUnderscore: convert spaces to underscores
+	 * * doNotTrim:         do not trim the user input
 	 *
 	 * @param string $strKey   The property name
 	 * @param mixed  $varValue The property value
@@ -229,6 +237,10 @@ abstract class Widget extends View
 				{
 					$this->strClass = trim($this->strClass . ' ' . $varValue);
 				}
+				break;
+
+			case 'prefix':
+				$this->strPrefix = $varValue;
 				break;
 
 			case 'template':
@@ -308,7 +320,7 @@ abstract class Widget extends View
 			case 'storeValues':
 			case 'trailingSlash':
 			case 'spaceToUnderscore':
-			case 'nullIfEmpty':
+			case 'doNotTrim':
 				$this->arrConfiguration[$strKey] = $varValue ? true : false;
 				break;
 
@@ -342,6 +354,7 @@ abstract class Widget extends View
 	 * * label:    the field label
 	 * * value:    the field value
 	 * * class:    one or more CSS classes
+	 * * prefix:   the CSS class prefix
 	 * * template: the template name
 	 * * wizard:   the field wizard markup
 	 * * required: makes the widget a required field
@@ -372,15 +385,19 @@ abstract class Widget extends View
 				{
 					return Encryption::encrypt($this->varValue);
 				}
-				elseif ($this->arrConfiguration['nullIfEmpty'] && $this->varValue == '')
+				elseif ($this->varValue == '')
 				{
-					return null;
+					return $this->getEmptyStringOrNull();
 				}
 				return $this->varValue;
 				break;
 
 			case 'class':
 				return $this->strClass;
+				break;
+
+			case 'prefix':
+				return $this->strPrefix;
 				break;
 
 			case 'template':
@@ -754,7 +771,10 @@ abstract class Widget extends View
 			return $varInput;
 		}
 
-		$varInput = trim($varInput);
+		if (!$this->doNotTrim)
+		{
+			$varInput = trim($varInput);
+		}
 
 		if ($varInput == '')
 		{
@@ -1358,9 +1378,49 @@ abstract class Widget extends View
 		{
 			return 0;
 		}
-		else
+
+		return '';
+	}
+
+
+	/**
+	 * Return either an empty string or null based on the SQL string
+	 *
+	 * @return string|int|null The empty value
+	 */
+	public function getEmptyStringOrNull()
+	{
+		if (!isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['sql']))
 		{
 			return '';
 		}
+
+		return static::getEmptyStringOrNullByFieldType($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['sql']);
+	}
+
+
+	/**
+	 * Return either an empty string or null based on the SQL string
+	 *
+	 * @param string $sql The SQL string
+	 *
+	 * @return string|null The empty string or null
+	 */
+	public static function getEmptyStringOrNullByFieldType($sql)
+	{
+		if ($sql == '')
+		{
+			return '';
+		}
+
+		// Strip the field type definition
+		list(, $def) = explode(' ', $sql, 2);
+
+		if (strpos($def, 'NULL') !== false && strpos($def, 'NOT NULL') === false)
+		{
+			return null;
+		}
+
+		return '';
 	}
 }

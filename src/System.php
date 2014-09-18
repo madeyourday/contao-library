@@ -12,8 +12,6 @@
 
 namespace Contao;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 
 /**
  * Abstract library base class
@@ -68,12 +66,6 @@ abstract class System
 	 * @var array
 	 */
 	protected static $arrLanguageFiles = [];
-
-	/**
-	 * The Symfony DI container
-	 * @var ContainerInterface
-	 */
-	protected static $objContainer;
 
 
 	/**
@@ -791,31 +783,41 @@ abstract class System
 
 
 	/**
-	 * Set the Symfony container object
+	 * Return the installed version of a component
 	 *
-	 * @param ContainerInterface $container A container object
+	 * @param string $strName The component name
 	 *
-	 * @throws \RuntimeException If the container is already set
+	 * @return string|null The version number or null
 	 */
-	public static function setContainer(ContainerInterface $container)
+	public static function getComponentVersion($strName)
 	{
-		if (static::$objContainer !== null)
+		$strCacheFile = 'system/cache/packages/installed.php';
+
+		// Try to load from cache
+		if (!Config::get('bypassCache') && file_exists(TL_ROOT . '/' . $strCacheFile))
 		{
-			throw new \RuntimeException('The container is already set and cannot be changed');
+			$arrPackages = include TL_ROOT . '/' . $strCacheFile;
+
+			return $arrPackages[$strName];
 		}
 
-		static::$objContainer = $container;
-	}
+		$objJson = json_decode(file_get_contents(TL_ROOT . '/vendor/composer/installed.json'), true);
 
+		// Try to find a matching package
+		foreach ($objJson as $objPackage)
+		{
+			if ($objPackage['name'] == $strName)
+			{
+				$strVersion = substr($objPackage['version_normalized'], 0, strrpos($objPackage['version_normalized'], '.'));
 
-	/**
-	 * Return the Symfony container object
-	 *
-	 * @return ContainerInterface
-	 */
-	public static function getContainer()
-	{
-		return static::$objContainer;
+				if (preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/', $strVersion))
+				{
+					return $strVersion;
+				}
+			}
+		}
+
+		return null;
 	}
 
 
